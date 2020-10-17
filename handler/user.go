@@ -23,14 +23,23 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	var input user.RegisterUserInput
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, nil)
+		errors := helper.FormatError(err)       //get metode helper error
+		errorMessage := gin.H{"errors": errors} // error tsb di map oleh gin.H
+
+		response := helper.APIResponse("failed register", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
 	}
 
-	user, err := h.userService.RegisterUser(input)
+	newUser, err := h.userService.RegisterUser(input)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, nil)
+		response := helper.APIResponse("failed register", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
 	}
-	response := helper.APIResponse("Account has ben registered", http.StatusOK, "success", user)
+
+	formatter := user.FormatUser(newUser, "tokentonesakdjiawiiwi")
+	response := helper.APIResponse("Account has ben registered", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
 }
