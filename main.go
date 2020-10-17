@@ -4,6 +4,7 @@ import (
 	"gomar/user"
 	"log"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -16,8 +17,19 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	userRepository := user.NewRepository(db)
-	user := user.User{
-		Name: "tes simpan",
-	}
-	userRepository.Save(user)
+	userService := user.NewService(userRepository)
+
+	userHandler := handler.NewUserHandler(userService)
+
+	router := gin.Default()
+	api := router.Group("api/v1")
+	api.POST("/users", userHandler.RegisterUser)
+	router.Run()
+
+	// input dari user
+	// handler, maping input dari user -> struct input
+	// service : maping dari struct input ke struct User
+	// repository
+	// db
+
 }
