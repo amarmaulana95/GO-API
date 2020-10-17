@@ -24,12 +24,12 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 		return user, err
 	}
 	user.PasswordHash = string(passwordHash)
-		user.Role = "user"
-		newUser, err := s.repository.Save(user)
-		if err != nil {
-			return newUser, err
-		}
-		return newUser, nil
+	user.Role = "user"
+	newUser, err := s.repository.Save(user)
+	if err != nil {
+		return newUser, err
+	}
+	return newUser, nil
 }
 
 // maping struct ke user
