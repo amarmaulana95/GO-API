@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gomar/user"
 	"log"
 
 	"gorm.io/driver/mysql"
@@ -14,5 +15,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
+	userRepository := user.NewRepository(db)
+	user := user.User{
+		Name: "tes simpan",
+	}
+	userRepository.Save(user)
 }
