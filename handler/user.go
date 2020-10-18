@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"gomar/helper"
 	"gomar/user"
 	"net/http"
@@ -73,4 +74,90 @@ func (h *userHandler) Login(c *gin.Context) {
 	formatter := user.FormatUser(loggedinUser, "tokenabfcjdjwiidkdk")
 	response := helper.APIResponse("Login success", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) CekEmailDB(c *gin.Context) {
+	// if email ada di db atau belum ?
+	// input di maping ke struck
+	// struck input di parsing ke service
+	// service akan memanggil repo - amil ada or belum ?
+	// repository melakukan query di db
+
+	var input user.CheckEmailInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err) //get metode helper error
+		errorMessage := gin.H{"errors": errors}     // error tsb di map oleh gin.H
+		response := helper.APIResponse("Email Check failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	IsEmailAvailable, err := h.userService.IsEmailAvailable(input)
+	if err != nil {
+		errorMessage := gin.H{"errors": "Server Error"}
+		response := helper.APIResponse("Email Check failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	data := gin.H{
+		"is_available": IsEmailAvailable,
+	}
+
+	pesan := "Email has been registered"
+
+	if IsEmailAvailable {
+		pesan = "Email is available"
+	}
+
+	response := helper.APIResponse(pesan, http.StatusOK, "success", data)
+	c.JSON(http.StatusOK, response)
+	return
+
+}
+
+func (h *userHandler) UploadAvatar(c *gin.Context) {
+
+	// tangkap inputan user
+	// save gambar ke folder "image"
+	// di service panggil repository
+	// JWT (HARCODE) ,user login ID == 1
+	// Repository get data where user ID == 1
+	// repo update data user, simpan lokasi file
+
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.APIResponse("Failed to upload image ", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	userID := 1
+	path := fmt.Sprintf("images/%d-%s", userID, file.Filename)
+
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.APIResponse("Failed to upload image ", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	_, err = h.userService.SaveAvatar(userID, path)
+
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.APIResponse("Failed to upload image ", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	data := gin.H{"is_uploaded": true}
+	response := helper.APIResponse("Avatar success upload ", http.StatusOK, "susccess", data)
+
+	c.JSON(http.StatusOK, response)
+	return
 }
