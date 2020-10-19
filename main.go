@@ -23,7 +23,6 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	userRepository := user.NewRepository(db)
-
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
 
@@ -47,9 +46,9 @@ func main() {
 }
 
 func authMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
+
 	return func(c *gin.Context) {
-		// ambil header
-		authHeader := c.GetHeader("Auhtorization")
+		authHeader := c.GetHeader("Authorization")
 		// jika di dalam string auth header ada kata "Bearer" ?
 		if !strings.Contains(authHeader, "Bearer") {
 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
@@ -72,28 +71,25 @@ func authMiddleware(authService auth.Service, userService user.Service) gin.Hand
 			return
 		}
 
-		//ambil data dalam token
-
 		claim, ok := token.Claims.(jwt.MapClaims)
 
-		if !ok || token.Valid {
+		if !ok || !token.Valid {
 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			// abourt white status hentikan
 			return
 		}
 
-		// ambil user id
 		userID := int(claim["user_id"].(float64))
-
 		user, err := userService.GetUserByID(userID)
+
 		if err != nil {
 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			// abourt white status hentikan
 			return
 		}
-		// cek siapa yg login/ akses aplikasi
-		c.Set("CurrentUser", user)
+		c.Set("currentUser", user)
 	}
+
 }
