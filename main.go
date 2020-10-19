@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gomar/auth"
 	"gomar/handler"
 	"gomar/user"
 	"log"
@@ -20,7 +21,9 @@ func main() {
 	userRepository := user.NewRepository(db)
 
 	userService := user.NewService(userRepository)
-	userHandler := handler.NewUserHandler(userService)
+	authService := auth.NewService()
+
+	userHandler := handler.NewUserHandler(userService, authService)
 
 	router := gin.Default()
 	api := router.Group("api/v1")
