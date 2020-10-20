@@ -16,10 +16,21 @@ func NewRepository(db *gorm.DB) *repository {
 }
 
 func (r *repository) FindAll() ([]Campaign, error) {
-	var campaigns []campaigns
-	err := r.db.Find(&campaigns).Error
+	var campaigns []Campaign
+	err := r.db.Preload("CampaignImages", "campaign_images.is_primary=1").Find(&campaigns).Error
+	if err != nil {
+
+		return campaigns, err
+	}
+	return campaigns, nil
+}
+
+func (r *repository) FindByUserID(userID int) ([]Campaign, error) {
+	var campaigns []Campaign
+	//ambil data yg berelasi dengang menggunakan preload
+	err := r.db.Where("user_id = ?", userID).Preload("CampaignImages", "campaign_images.is_primary=1").Find(&campaigns).Error
 	if err != nil {
 		return campaigns, err
 	}
-	return campaigns, nill
+	return campaigns, nil
 }
