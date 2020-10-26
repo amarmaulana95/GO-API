@@ -1,6 +1,9 @@
 package campaign
 
-import "time"
+import (
+	"os/user"
+	"time"
+)
 
 type Campaign struct {
 	ID               int
@@ -17,6 +20,7 @@ type Campaign struct {
 	UpdatedAt        time.Time
 
 	CampaignImages []CampaignImage //relasi
+	User           user.User
 }
 
 type CampaignImage struct {
