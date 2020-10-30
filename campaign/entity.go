@@ -7,7 +7,7 @@ import (
 
 type Campaign struct {
 	ID               int
-	userID           int
+	UserID           int
 	Name             string
 	ShortDescription string
 	Description      string
@@ -18,7 +18,7 @@ type Campaign struct {
 	Slug             string
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
-	CampaignImages   []CampaignImage `gorm:"many2many:users;"`
+	CampaignImages   []CampaignImage
 	User             user.User
 }
 

@@ -15,7 +15,7 @@ func FormatCampaign(campaign Campaign) CampaignFormatter {
 	//buat object
 	CampaignFormatter := CampaignFormatter{}
 	CampaignFormatter.ID = campaign.ID
-	CampaignFormatter.userID = campaign.userID
+	CampaignFormatter.userID = campaign.UserID
 	CampaignFormatter.Name = campaign.Name
 	CampaignFormatter.ShortDescription = campaign.ShortDescription
 	CampaignFormatter.GoalAmount = campaign.GoalAmount
