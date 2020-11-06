@@ -1,5 +1,7 @@
 package campaign
 
+import "strings"
+
 type CampaignFormatter struct {
 	ID               int    `json:"id"`
 	userID           int    `json:"user_id"`
@@ -54,4 +56,31 @@ type CampaignDetailFormatter struct {
 	Perks            []string `json:"perks"`
 	// User             CampaignUserFormatter    `json:"user"`
 	// Images           []CampaignImageFormatter `json:"images"`
+}
+
+func FormatCampaignDetail(campaign Campaign) CampaignDetailFormatter {
+	campaignDetailFormatter := CampaignDetailFormatter{}
+	campaignDetailFormatter.ID = campaign.ID
+	campaignDetailFormatter.Name = campaign.Name
+	campaignDetailFormatter.ShortDescription = campaign.ShortDescription
+	campaignDetailFormatter.Description = campaign.Description
+	campaignDetailFormatter.GoalAmount = campaign.GoalAmount
+	campaignDetailFormatter.CurrentAmount = campaign.CurrentAmount
+	campaignDetailFormatter.BackerCount = campaign.BackerCount
+	campaignDetailFormatter.UserID = campaign.UserID
+	campaignDetailFormatter.Slug = campaign.Slug
+	campaignDetailFormatter.ImageURL = ""
+
+	if len(campaign.CampaignImages) > 0 {
+		campaignDetailFormatter.ImageURL = campaign.CampaignImages[0].FileName
+	}
+	var perks []string
+
+	for _, perk := range strings.Split(campaign.Perks, ",") {
+		perks = append(perks, strings.TrimSpace(perk))
+	}
+
+	campaignDetailFormatter.Perks = perks
+
+	return campaignDetailFormatter
 }
