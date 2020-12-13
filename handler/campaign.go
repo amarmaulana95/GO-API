@@ -3,6 +3,7 @@ package handler
 import (
 	"gomar/campaign"
 	"gomar/helper"
+	"gomar/user"
 	"net/http"
 	"strconv"
 
@@ -49,14 +50,14 @@ func (h *campaignHandler) GetCampaign(c *gin.Context) { //detail campaign
 	err := c.ShouldBindUri(&input)
 
 	if err != nil {
-		response := helper.APIResponse("Failed get detail campaign", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Gagal get detail data campaign", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
 	campaignDetail, err := h.service.GetCampaignByID(input)
 	if err != nil {
-		response := helper.APIResponse("Failed get detail campaign", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Gagal get detail data campaign", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -64,4 +65,32 @@ func (h *campaignHandler) GetCampaign(c *gin.Context) { //detail campaign
 	response := helper.APIResponse("campaign detail", http.StatusOK, "success", campaign.FormatCampaignDetail(campaignDetail))
 	c.JSON(http.StatusOK, response)
 	return
+}
+
+func (h *campaignHandler) CreateCampaign(c *gin.Context) {
+	var input campaign.CreateCampaignInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Gagal input data campaign", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	input.User = currentUser
+
+	newCampaign, err := h.service.CreateCampaign(input)
+	if err != nil {
+		response := helper.APIResponse("Gagal input data campaign", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Success insert data campaign", http.StatusOK, "success", campaign.FormatCampaign(newCampaign))
+	c.JSON(http.StatusOK, response)
 }
