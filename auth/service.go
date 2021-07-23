@@ -2,6 +2,8 @@ package auth
 
 import (
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -21,11 +23,17 @@ func NewService() *jwtService {
 }
 
 func (s *jwtService) GenerateToken(userID int) (string, error) {
+
+	Expired := time.Now().Add(time.Hour * 24 * 7).Unix()
+	fmt.Println(Expired)
+
 	claim := jwt.MapClaims{}
 	claim["user_id"] = userID
+	claim["exp"] = Expired
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	signedToken, err := token.SignedString(SCREET_KEY)
+
 	if err != nil {
 		return signedToken, err
 	}
